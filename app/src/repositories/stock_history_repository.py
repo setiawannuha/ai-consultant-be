@@ -5,10 +5,7 @@ class StockHistoryRepository:
         self.db = db_provider.get_database()
         self.collection = self.db['stock_history']
 
-    def find(self, symbol: str = None):
-        # Jika symbol ada, buat filter. Jika tidak, gunakan dict kosong {}
-        query = {"Symbol": symbol} if symbol else {}
-        
-        # Menjalankan find dengan query dinamis
-        cursor = self.collection.find(query, {"_id": 0}) 
+    def find(self, symbol, limit=100):
+        # Mengambil data terbaru (sort Date DESC) dengan limit tertentu
+        cursor = self.collection.find({"Symbol": symbol}).sort("Date", -1).limit(limit)
         return list(cursor)

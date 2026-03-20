@@ -92,7 +92,7 @@ def fetch_and_save_stock_data(start_date, end_date):
 if __name__ == "__main__":
     # Tentukan range tanggal di sini
     # Tip: Gunakan rentang yang masuk akal agar tidak terkena limit API
-    START = "2026-01-10"
+    START = "2026-01-01"
     END = date.today().isoformat()
     
     fetch_and_save_stock_data(START, END)
