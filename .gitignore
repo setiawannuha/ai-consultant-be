@@ -1,3 +1,4 @@
 venv/
 app/ai-models/
 .env
+stock-summarization/
