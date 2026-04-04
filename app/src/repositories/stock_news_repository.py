@@ -9,6 +9,6 @@ class StockNewsRepository:
         cursor = (
             self.collection
             .find({}, {"_id": 0})
-            .sort("Date", -1)
+            .sort("date", -1)
         )
         return list(cursor)

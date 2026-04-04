@@ -21,8 +21,8 @@ class PredictionService:
         return None
 
     def predict_batch(self, model, df, scaler):
-        # Menggunakan fitur asli Anda: Open, High, Low, Close, Volume, MFI
-        features = ['Open', 'High', 'Low', 'Close', 'Volume', 'MFI']
+        # Menggunakan fitur asli Anda: open, high, low, close, volume, mfi
+        features = ['open', 'high', 'low', 'close', 'volume', 'mfi']
         scaled = scaler.transform(df[features].values)
         
         windows = [scaled[i-60:i] for i in range(60, len(scaled))]
@@ -37,5 +37,5 @@ class PredictionService:
                 dummy = np.zeros((1, 6))
                 dummy[0, 3] = preds_scaled[i, j]
                 res.append(float(scaler.inverse_transform(dummy)[0, 3]))
-            results[idx] = {"H1": res[0], "H2": res[1], "H3": res[2]}
+            results[idx] = {"h1": res[0], "h2": res[1], "h3": res[2]}
         return results

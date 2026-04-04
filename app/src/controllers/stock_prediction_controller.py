@@ -26,7 +26,7 @@ class StockPredictionController:
         return int((midnight - now).total_seconds())
 
     def _get_mfi_status(self, score):
-        """Helper untuk menentukan status berdasarkan skor MFI"""
+        """Helper untuk menentukan status berdasarkan skor mfi"""
         if score >= 80: return "Overbought"
         elif score <= 20: return "Oversold"
         else: return "Netral"
@@ -34,8 +34,8 @@ class StockPredictionController:
     def _determine_action(self, last_price, fair_price, mfi_status, rsi_score, macd_hist, ai_pred_h1):
         """
         Logika Pengambilan Keputusan yang diperluas:
-        - STRONG BUY: Murah + Oversold (MFI/RSI) + MACD Momentum Positif + AI Naik
-        - SELL: Mahal + Overbought + MACD Momentum Negatif
+        - STRONG BUY: Murah + Oversold (mfi/rsi) + macd Momentum Positif + AI Naik
+        - SELL: Mahal + Overbought + macd Momentum Negatif
         """
         is_cheap = last_price < fair_price
         ai_trend_up = ai_pred_h1 > last_price if ai_pred_h1 else False
@@ -68,7 +68,7 @@ class StockPredictionController:
         # 2. Ambil Data Dasar
         prof = self.profile_repo.find_one(symbol)
         if not prof:
-            return {"message": f"Profile {symbol} tidak ditemukan"}
+            return {"message": f"profile {symbol} tidak ditemukan"}
 
         limit = 120 
         all_history = self.history_repo.find(symbol, limit=limit)
@@ -76,22 +76,22 @@ class StockPredictionController:
             return {"message": "Data history tidak cukup (minimal 80)"}
 
         # 3. Proses DataFrame & Indikator
-        df = pd.DataFrame(all_history).sort_values('Date', ascending=True).reset_index(drop=True)
+        df = pd.DataFrame(all_history).sort_values('date', ascending=True).reset_index(drop=True)
         
         # Kalkulasi via TechnicalIndicatorService (TI)
-        df['MFI'] = TI.calculate_mfi(df)
-        df['MA5'] = TI.calculate_ma(df, 5)
-        df['MA20'] = TI.calculate_ma(df, 20)
-        df['RSI'] = TI.calculate_rsi(df, 14)
-        df['MACD'], df['MACD_Signal'], df['MACD_Hist'] = TI.calculate_macd(df)
+        df['mfi'] = TI.calculate_mfi(df)
+        df['ma5'] = TI.calculate_ma(df, 5)
+        df['ma20'] = TI.calculate_ma(df, 20)
+        df['rsi'] = TI.calculate_rsi(df, 14)
+        df['macd'], df['macd_signal'], df['macd_hist'] = TI.calculate_macd(df)
         
-        # Bersihkan NaN dari MFI agar scaler tidak error
-        df = df.dropna(subset=['MFI']).reset_index(drop=True)
+        # Bersihkan NaN dari mfi agar scaler tidak error
+        df = df.dropna(subset=['mfi']).reset_index(drop=True)
 
         # 4. Prediksi AI
         model = self.predict_service.get_model(symbol)
         scaler = MinMaxScaler(feature_range=(0, 1))
-        features = ['Open', 'High', 'Low', 'Close', 'Volume', 'MFI']
+        features = ['open', 'high', 'low', 'close', 'volume', 'mfi']
         scaler.fit(df[features].values)
         
         batch_predictions = self.predict_service.predict_batch(model, df, scaler) if model else {}
@@ -99,48 +99,48 @@ class StockPredictionController:
         # 5. Mapping Response
         df_display = df.tail(30).copy()
         history_response = []
-        fair_price_graham = float(prof.get('FairPriceGraham', 0) or 0)
+        fair_price_graham = float(prof.get('fair_price_graham', 0) or 0)
 
         for i, row in df_display.iterrows():
             pred = batch_predictions.get(i)
-            mfi_score = float(row['MFI'] or 0)
-            rsi_score = float(row['RSI'] or 0)
-            macd_hist = float(row['MACD_Hist'] or 0)
+            mfi_score = float(row['mfi'] or 0)
+            rsi_score = float(row['rsi'] or 0)
+            macd_hist = float(row['macd_hist'] or 0)
             
             mfi_status = self._get_mfi_status(mfi_score)
-            ai_h1 = pred['H1'] if pred else None
+            ai_h1 = pred['h1'] if pred else None
             
             action = self._determine_action(
-                row['Close'], fair_price_graham, mfi_status, rsi_score, macd_hist, ai_h1
+                row['close'], fair_price_graham, mfi_status, rsi_score, macd_hist, ai_h1
             )
 
             history_response.append({
-                "Symbol": row['Symbol'],
-                "Date": row['Date'],
-                "High": row['High'],
-                "Low": row['Low'],
-                "Close": row['Close'],
-                "Volume": row['Volume'],
-                "Indicators": {
-                    "MA5": round(row['MA5'], 2) if not pd.isna(row['MA5']) else None,
-                    "MA20": round(row['MA20'], 2) if not pd.isna(row['MA20']) else None,
-                    "RSI": round(rsi_score, 2),
-                    "MACD": {
-                        "Line": round(row['MACD'], 2) if not pd.isna(row['MACD']) else None,
-                        "Signal": round(row['MACD_Signal'], 2) if not pd.isna(row['MACD_Signal']) else None,
-                        "Hist": round(macd_hist, 2)
+                "symbol": row['symbol'],
+                "date": row['date'],
+                "high": row['high'],
+                "low": row['low'],
+                "close": row['close'],
+                "volume": row['volume'],
+                "indicators": {
+                    "ma5": round(row['ma5'], 2) if not pd.isna(row['ma5']) else None,
+                    "ma20": round(row['ma20'], 2) if not pd.isna(row['ma20']) else None,
+                    "rsi": round(rsi_score, 2),
+                    "macd": {
+                        "line": round(row['macd'], 2) if not pd.isna(row['macd']) else None,
+                        "signal": round(row['macd_signal'], 2) if not pd.isna(row['macd_signal']) else None,
+                        "hist": round(macd_hist, 2)
                     },
-                    "MFI": {
-                        "Score": round(mfi_score, 2),
-                        "Status": mfi_status
+                    "mfi": {
+                        "score": round(mfi_score, 2),
+                        "status": mfi_status
                     }
                 },
-                "Analysis": {
-                    "FairPriceGraham": fair_price_graham,
-                    "IsCheap": row['Close'] < fair_price_graham,
-                    "Action": action
+                "analysis": {
+                    "fair_price_graham": fair_price_graham,
+                    "is_cheap": row['close'] < fair_price_graham,
+                    "action": action
                 },
-                "Prediction": {"Close": pred} if pred else None
+                "prediction": {"close": pred} if pred else None
             })
 
         # 6. Prediksi Masa Depan (Next Day)
@@ -154,16 +154,16 @@ class StockPredictionController:
 
             if future_pred:
                 history_response.append({
-                    "Date": "Next Trading Day",
-                    "Analysis": {
-                        "Action": "PREDICTION ONLY"
+                    "date": "Next Trading Day",
+                    "analysis": {
+                        "action": "PREDICTION ONLY"
                     },
-                    "Prediction": {"Close": future_pred}
+                    "prediction": {"close": future_pred}
                 })
 
         result = {
-            "Profile": prof,
-            "History": history_response
+            "profile": prof,
+            "history": history_response
         }
 
         # 7. Simpan ke Redis
@@ -189,4 +189,4 @@ class StockPredictionController:
         # Implementasi get_list bisa memanggil get_detail untuk tiap simbol
         # atau disederhanakan sesuai kebutuhan profil
         profiles = self.profile_repo.find_all()
-        return [self.get_detail(p['Symbol']) for p in profiles]
+        return [self.get_detail(p['symbol']) for p in profiles]

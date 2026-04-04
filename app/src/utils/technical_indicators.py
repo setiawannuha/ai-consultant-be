@@ -4,8 +4,8 @@ import numpy as np
 class TechnicalIndicatorService:
     @staticmethod
     def calculate_mfi(df, period=20):
-        tp = (df['High'] + df['Low'] + df['Close']) / 3
-        mf = tp * df['Volume']
+        tp = (df['high'] + df['low'] + df['close']) / 3
+        mf = tp * df['volume']
         delta = tp.diff()
         pos_mf = pd.Series(np.where(delta > 0, mf, 0), index=df.index)
         neg_mf = pd.Series(np.where(delta < 0, mf, 0), index=df.index)
@@ -16,11 +16,11 @@ class TechnicalIndicatorService:
 
     @staticmethod
     def calculate_ma(df, period):
-        return df['Close'].rolling(window=period).mean()
+        return df['close'].rolling(window=period).mean()
 
     @staticmethod
     def calculate_rsi(df, period=14):
-        delta = df['Close'].diff()
+        delta = df['close'].diff()
         gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
         loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
         rs = gain / (loss + 1e-10)
@@ -28,8 +28,8 @@ class TechnicalIndicatorService:
 
     @staticmethod
     def calculate_macd(df, slow=26, fast=12, signal=9):
-        ema_fast = df['Close'].ewm(span=fast, adjust=False).mean()
-        ema_slow = df['Close'].ewm(span=slow, adjust=False).mean()
+        ema_fast = df['close'].ewm(span=fast, adjust=False).mean()
+        ema_slow = df['close'].ewm(span=slow, adjust=False).mean()
         macd_line = ema_fast - ema_slow
         signal_line = macd_line.ewm(span=signal, adjust=False).mean()
         histogram = macd_line - signal_line

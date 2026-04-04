@@ -27,8 +27,8 @@ def load_symbols(filename="symbols.txt"):
 
 def calculate_mfi(df, period=20):
     """Menghitung Money Flow Index (MFI)"""
-    typical_price = (df['High'] + df['Low'] + df['Close']) / 3
-    money_flow = typical_price * df['Volume']
+    typical_price = (df['high'] + df['low'] + df['close']) / 3
+    money_flow = typical_price * df['volume']
     
     positive_flow = []
     negative_flow = []
@@ -78,13 +78,13 @@ def calculate_accuracy(actual, pred):
 
 def train_stock_model(symbol):
     db = db_provider.get_database()
-    cursor = db["stock_history"].find({"Symbol": symbol}).sort("Date", 1)
+    cursor = db["stock_history"].find({"symbol": symbol}).sort("date", 1)
     df = pd.DataFrame(list(cursor))
     
     if df.empty: return
 
-    df['MFI'] = calculate_mfi(df, period=20)
-    df.dropna(subset=['MFI'], inplace=True)
+    df['mfi'] = calculate_mfi(df, period=20)
+    df.dropna(subset=['mfi'], inplace=True)
     
     # Butuh data lebih banyak karena kita memprediksi hingga 3 hari ke depan
     # i + 60 (lookback) + 3 (target) = minimal 63 baris data bersih
@@ -92,7 +92,7 @@ def train_stock_model(symbol):
         print(f"⚠️ Data {symbol} tidak cukup.")
         return
 
-    features = ['Open', 'High', 'Low', 'Close', 'Volume', 'MFI']
+    features = ['open', 'high', 'low', 'close', 'volume', 'mfi']
     dataset = df[features].values
     
     scaler = MinMaxScaler(feature_range=(0, 1))
@@ -106,7 +106,7 @@ def train_stock_model(symbol):
         # Input: 60 hari terakhir
         X.append(scaled_data[i-prediction_days:i, :])
         
-        # Target: Ambil kolom 'Close' (index 3) untuk 3 hari ke depan
+        # Target: Ambil kolom 'close' (index 3) untuk 3 hari ke depan
         # scaled_data[i, 3]     -> Hari ke-1 (Besok)
         # scaled_data[i+1, 3]   -> Hari ke-2 (Lusa)
         # scaled_data[i+2, 3]   -> Hari ke-3 (Tulat)
@@ -128,7 +128,7 @@ def train_stock_model(symbol):
         res = []
         for val in scaled_array:
             dummy = np.zeros((1, 6))
-            dummy[0, 3] = val  # Index 3 adalah 'Close'
+            dummy[0, 3] = val  # Index 3 adalah 'close'
             res.append(scaler.inverse_transform(dummy)[0, 3])
         return np.array(res)
     

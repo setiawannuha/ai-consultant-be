@@ -6,7 +6,7 @@ class StockProfileRepository:
         self.collection = self.db['stock_profiles']
 
     def find_one(self, symbol: str):
-        return self.collection.find_one({"Symbol": symbol}, {"_id": 0})
+        return self.collection.find_one({"symbol": symbol}, {"_id": 0})
 
     def find_all(self):
         return list(self.collection.find({}, {"_id": 0}))

@@ -21,11 +21,11 @@ class StockPortfolioController:
             total_shares = total_lots * 100
 
             latest_history = self.history_col.find_one(
-                {"Symbol": symbol},
-                sort=[("Date", -1)]
+                {"symbol": symbol},
+                sort=[("date", -1)]
             )
 
-            current_price = latest_history['Close'] if latest_history else 0
+            current_price = latest_history['close'] if latest_history else 0
             
             market_value = current_price * total_shares
             total_cost = avg_price * total_shares

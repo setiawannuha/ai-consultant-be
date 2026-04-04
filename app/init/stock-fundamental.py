@@ -9,8 +9,7 @@ import time
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from connection.mongodb import db_provider
 
-# Cache untuk nilai kurs agar tidak fetch berulang kali dalam satu sesi
-CURRENCY_CACHE = {"IDR": 1.0}
+FIXED_USD_IDR_RATE = 16800.0
 
 def load_symbols(filename="symbols.txt"):
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -22,24 +21,12 @@ def load_symbols(filename="symbols.txt"):
         return [line.strip() for line in f if line.strip()]
 
 def get_exchange_rate(from_currency):
-    """Mendapatkan kurs dari from_currency ke IDR"""
-    if from_currency == "IDR" or not from_currency:
-        return 1.0
-    
-    if from_currency in CURRENCY_CACHE:
-        return CURRENCY_CACHE[from_currency]
-    
-    try:
-        ticker_name = f"{from_currency}IDR=X"
-        rate_data = yf.Ticker(ticker_name)
-        # Ambil harga closing terakhir
-        rate = rate_data.history(period="1d")['Close'].iloc[-1]
-        CURRENCY_CACHE[from_currency] = rate
-        print(f"💱 Kurs 1 {from_currency} = {rate:,.2f} IDR")
-        return rate
-    except:
-        print(f"⚠️ Gagal kurs {from_currency}, gunakan asumsi 1.0")
-        return 1.0
+    """Mendapatkan kurs khusus IDR dan USD"""
+    currency = str(from_currency).upper().strip() if from_currency else "IDR"
+    if currency == "USD":
+        print(f"💵 Kurs Tetap USD: {FIXED_USD_IDR_RATE}")
+        return FIXED_USD_IDR_RATE
+    return 1.0
 
 def get_val(df, labels):
     if df is None or df.empty:
@@ -57,7 +44,7 @@ def sync_company_profiles():
 
     db = db_provider.get_database()
     collection = db["stock_profiles"]
-    collection.create_index("Symbol", unique=True)
+    collection.create_index("symbol", unique=True)
 
     for symbol in symbols:
         print(f"--- Fetching: {symbol} ---")
@@ -91,7 +78,7 @@ def sync_company_profiles():
                 if bvps is not None and shares is not None:
                     raw_equity = bvps * shares
             
-            # Fallback BVPS
+            # Fallback bvps
             raw_bvps = None
             if raw_equity and shares:
                 raw_bvps = raw_equity / shares
@@ -117,31 +104,31 @@ def sync_company_profiles():
                     mos = (fair_price - last_price) / fair_price
 
             profile_data = {
-                "Symbol": symbol,
-                "ShortName": info.get('shortName'),
-                "OriginalCurrency": original_currency,
-                "ExchangeRateToIDR": rate,
+                "symbol": symbol,
+                "short_name": info.get('shortName'),
+                "original_currency": original_currency,
+                "exchange_rate_to_idr": rate,
                 
                 # Data dalam IDR
-                "LastPrice": last_price,
-                "MarketCap": market_cap,
-                "TotalRevenue": revenue,
-                "NetProfit": net_profit,
-                "TotalEquity": total_equity,
-                "EPS": eps,
-                "BVPS": bvps,
-                "FairPriceGraham": fair_price,
+                "last_price": last_price,
+                "market_cap": market_cap,
+                "total_revenue": revenue,
+                "net_profit": net_profit,
+                "total_equity": total_equity,
+                "eps": eps,
+                "bvps": bvps,
+                "fair_price_graham": fair_price,
                 
                 # Ratios (Rasio tetap sama, tidak terpengaruh konversi mata uang)
-                "PER": info.get('trailingPE'),
-                "PBV": pbv,
-                "MarginOfSafety": mos,
-                "DividendYield": info.get('dividendYield'),
+                "per": info.get('trailingPE'),
+                "pbv": pbv,
+                "margin_of_safety": mos,
+                "dividend_yield": info.get('dividendYield'),
                 
-                "LastUpdated": datetime.now()
+                "last_updated": datetime.now()
             }
 
-            collection.update_one({"Symbol": symbol}, {"$set": profile_data}, upsert=True)
+            collection.update_one({"symbol": symbol}, {"$set": profile_data}, upsert=True)
             print(f"✅ {symbol} Updated. Revenue: {revenue}, Profit: {net_profit}")
             print(f"✅ {symbol} ({original_currency} -> IDR). Price: {last_price:,.0f}")
             time.sleep(3)

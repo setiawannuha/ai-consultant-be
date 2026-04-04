@@ -6,6 +6,6 @@ class StockHistoryRepository:
         self.collection = self.db['stock_history']
 
     def find(self, symbol, limit=100):
-        # Mengambil data terbaru (sort Date DESC) dengan limit tertentu
-        cursor = self.collection.find({"Symbol": symbol}).sort("Date", -1).limit(limit)
+        # Mengambil data terbaru (sort date DESC) dengan limit tertentu
+        cursor = self.collection.find({"symbol": symbol}).sort("date", -1).limit(limit)
         return list(cursor)

@@ -34,13 +34,21 @@ expansion_projects = [
 # 4. Sentimen Makro & Sektoral
 macro_sentiments = [
     "harga komoditas naik", "suku bunga turun", "insentif pajak", 
+    "naik",
     "subsidi pemerintah", "kebijakan baru", "permintaan meningkat", 
+    "meningkat",
+    "pemulihan",
     "pemulihan sektor", "capital inflow", "net buy asing", "masuk indeks", "asing", "rebound",
     "stimulus ekonomi", "relaksasi regulasi",
     "pelonggaran kebijakan",
     "pemangkasan suku bunga",
     "msci",
-    "danantara"
+    "danantara",
+    "presiden",
+    "purbaya",
+    "suku bunga",
+    "bunga",
+    "free float"
 ]
 
 # 5. Kata Sifat/Katalis Pasar (Sentimen Berita)
@@ -48,10 +56,15 @@ market_catalysts = [
     "prospek cerah", "rekomendasi beli", "target harga naik", 
     "undervalued", "murah", "potensi naik", "bullish", "sentimen positif", 
     "katalis", "proyeksi optimis",
+    "optimis",
     "breakout",
     "akumulasi asing",
+    "melonjak",
     "volume melonjak",
-    "smart money masuk",
+    "smart money",
+    "smart",
+    "big",
+    "masuk",
     "re-rating",
     "valuasi menarik",
     "hidden gem",
@@ -60,6 +73,9 @@ market_catalysts = [
     "market darling",
     "technical rebound",
     "trend reversal",
+    "trend",
+    "momentum",
+    "positif",
     "momentum positif"
 ]
 

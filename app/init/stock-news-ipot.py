@@ -28,7 +28,7 @@ def scrape_dynamic_news(url):
     try:
         db = db_provider.get_database()
         collection = db["stock_news"]
-        collection.create_index([("ID", 1), ("Symbol", 1)], unique=True)
+        collection.create_index([("id", 1), ("symbol", 1)], unique=True)
 
         driver.get(url)
         
@@ -73,23 +73,23 @@ def scrape_dynamic_news(url):
                             matched_keywords = [k for k in keywords if k.lower() in content_lower]
 
                             if matched_keywords:
-                                ID = f"indopremier-{date}"
+                                id = f"indopremier-{date}"
                                 data = {
-                                    "ID": ID,
-                                    "Date": clean_and_convert_date(date).strftime("%Y-%m-%d %H:%M"),
-                                    "Article": article_content,
-                                    "ScrapedAt": datetime.now(),
-                                    "Url": news_url,
-                                    "Keywords": matched_keywords,
-                                    "From": "indopremier"
+                                    "id": id,
+                                    "date": clean_and_convert_date(date).strftime("%Y-%m-%d %H:%M"),
+                                    "article": article_content,
+                                    "scraped_at": datetime.now(),
+                                    "url": news_url,
+                                    "keywords": matched_keywords,
+                                    "from": "indopremier"
                                 }
                                 try:
                                     collection.update_one(
-                                        {"ID": ID},
+                                        {"id": id},
                                         {"$setOnInsert": data},
                                         upsert=True
                                     )
-                                    print(f"Berhasil memproses ID: {ID}")
+                                    print(f"Berhasil memproses id: {id}")
                                 except Exception as e:
                                     print(f"Gagal simpan ke MongoDB: {e}")
 

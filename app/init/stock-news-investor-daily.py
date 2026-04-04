@@ -33,7 +33,7 @@ def get_soup(url):
 def scrape_dynamic_news(url):
     db = db_provider.get_database()
     collection = db["stock_news"]
-    collection.create_index([("ID", 1), ("Symbol", 1)], unique=True)
+    collection.create_index([("id", 1), ("symbol", 1)], unique=True)
 
     try:
         soup = get_soup(url)
@@ -111,23 +111,23 @@ def scrape_dynamic_news(url):
                         except Exception as e:
                             print(e)
                             parsed_date = None
-                        ID = f"investor-daily-{parsed_date}"
+                        id = f"investor-daily-{parsed_date}"
                         data = {
-                            "ID": ID,
-                            "Date": parsed_date,
-                            "Article": full_article,
-                            "ScrapedAt": datetime.now(),
-                            "Url": news_url,
-                            "Keywords": matched_keywords,
-                            "From": "investor-daily"
+                            "id": id,
+                            "date": parsed_date,
+                            "article": full_article,
+                            "scraped_at": datetime.now(),
+                            "url": news_url,
+                            "keywords": matched_keywords,
+                            "from": "investor-daily"
                         }
                         try:
                             collection.update_one(
-                                {"ID": ID},
+                                {"id": id},
                                 {"$setOnInsert": data},
                                 upsert=True
                             )
-                            print(f"Berhasil memproses ID: {ID}")
+                            print(f"Berhasil memproses id: {id}")
                         except Exception as e:
                             print(f"Gagal simpan ke MongoDB: {e}")
 

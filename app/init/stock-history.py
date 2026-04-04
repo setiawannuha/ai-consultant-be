@@ -41,7 +41,7 @@ def fetch_and_save_stock_data(start_date, end_date):
     collection = db["stock_history"]
 
     # Pastikan index unik agar tidak ada duplikat per tanggal per saham
-    collection.create_index([("Date", 1), ("Symbol", 1)], unique=True)
+    collection.create_index([("date", 1), ("symbol", 1)], unique=True)
 
     print(f"🚀 Mengambil data historis dari {start_date} hingga {end_date}...")
 
@@ -68,16 +68,24 @@ def fetch_and_save_stock_data(start_date, end_date):
                 date_str = row['Date'].strftime('%Y-%m-%d')
                 
                 # Konversi row ke dictionary
-                stock_data = row.to_dict()
+                stock_data = {}
                 
                 # Menghilangkan objek Timestamp/Datetime agar kompatibel dengan MongoDB BSON
-                stock_data["Symbol"] = symbol
-                stock_data["Date"] = date_str
+                stock_data["symbol"] = symbol
+                stock_data["date"] = date_str
+                stock_data['adj_close'] = row['Adj Close']
+                stock_data['close'] = row['Close']
+                stock_data['dividends'] = row['Dividends']
+                stock_data['high'] = row['High']
+                stock_data['low'] = row['Low']
+                stock_data['open'] = row['Open']
+                stock_data['stock_splits'] = row['Stock Splits']
+                stock_data['volume'] = row['Volume']
                 
                 # 3. Logika Upsert: Gunakan $setOnInsert jika hanya ingin simpan data baru
                 # atau gunakan $set jika ingin menimpa data lama dengan data terbaru dari API
                 collection.update_one(
-                    {"Date": date_str, "Symbol": symbol},
+                    {"date": date_str, "symbol": symbol},
                     {"$setOnInsert": stock_data},
                     upsert=True
                 )
