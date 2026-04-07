@@ -22,7 +22,11 @@ class PredictionService:
 
     def predict_batch(self, model, df, scaler):
         # Menggunakan fitur asli Anda: open, high, low, close, volume, mfi
-        features = ['open', 'high', 'low', 'close', 'volume', 'mfi']
+        features = [
+            'close', 'open', 'high', 'low', 'volume', 
+            'ema10', 'ma20', 'rsi', 'macd_hist', 
+            'stoch_k', 'mfi', 'bb_upper', 'bb_lower'
+        ]
         scaled = scaler.transform(df[features].values)
         
         windows = [scaled[i-60:i] for i in range(60, len(scaled))]
