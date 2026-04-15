@@ -132,6 +132,61 @@ owners = [
     "Agung Sedayu"
 ]
 
+stock_list = [
+    "ADRO",
+    "NCKL",
+    "ITMG",
+    "HEXA",
+    "ANTM",
+    "GEMS",
+    "PTBA",
+    "PGAS",
+    "CTRA",
+    "DMAS",
+    "SKRN",
+    "LPPF",
+    "RALS",
+    "MPMX",
+    "TLKM",
+    "ACRO",
+    "PBID",
+    "ROTI",
+    "LPIN",
+    "POWR",
+    "ARNA",
+    "TOTO",
+    "ACES",
+    "SPTO",
+    "GHON",
+    "PSSI",
+    "SCMA",
+    "ERAA",
+    "BREN",
+    "SIMP",
+    "ASII",
+    "PWON",
+    "BUMI",
+    "AADI",
+    "ADMR",
+    "DILD",
+    "BMTR",
+    "SIMP",
+    "AVIA",
+    "MEDC",
+    "PTRO",
+    "UNTR",
+    "SMSM",
+    "BRPT",
+    "UNVR",
+    "ESIP",
+    "CBDK",
+    "PANI",
+    "CUAN",
+    "RMKO",
+    "PTRO",
+    "INET",
+]
+
 # Menggabungkan semua menjadi satu array besar
 keywords = (
     corporate_actions + 
@@ -139,5 +194,6 @@ keywords = (
     expansion_projects + 
     macro_sentiments + 
     market_catalysts +
-    owners
+    owners + 
+    stock_list
 )
