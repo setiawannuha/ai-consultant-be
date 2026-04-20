@@ -12,4 +12,7 @@ python3 app/init/stock-news-investor-daily.py
 sleep 2
 python3 app/init/stock-sentiment.py
 
+sleep 2
+python3 app/init/stock-sentiment-aggr.py
+
 echo "Semua script selesai dijalankan."

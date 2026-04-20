@@ -173,7 +173,7 @@ def fetch_and_save_stock_data(start_date, end_date):
             print(f"❌ Gagal mengambil data {symbol}: {e}")
 
 if __name__ == "__main__":
-    START = "2026-01-01"
+    START = "2026-04-01"
     END = date.today().isoformat()
     
     fetch_and_save_stock_data(START, END)

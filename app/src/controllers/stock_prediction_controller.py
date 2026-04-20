@@ -12,6 +12,7 @@ from src.repositories.stock_history_repository import StockHistoryRepository
 from src.repositories.stock_profile_repository import StockProfileRepository
 from connection.redis import redis_provider
 
+use_prediction = False
 class StockPredictionController:
     def __init__(self):
         self.history_repo = StockHistoryRepository()
@@ -70,6 +71,9 @@ class StockPredictionController:
         # 4. Load Model & Scaler
         model = self.predict_service.get_model(symbol)
         scaler = self._get_scaler(symbol)
+        if not use_prediction:
+            model = None
+            scaler = None
         
         # 5. Mapping Response (Looping 30 hari terakhir)
         df_display = df.tail(30).copy()
@@ -80,6 +84,8 @@ class StockPredictionController:
         for i, row in df_display.iterrows():
             # Logika Prediksi untuk baris ini
             ai_h1 = None
+            if not use_prediction:
+                ai_h1 = 0
             if model and scaler and i >= lookback:
                 try:
                     # Ambil window data sebelum hari ini untuk prediksi besoknya
@@ -125,8 +131,8 @@ class StockPredictionController:
                     "is_cheap": row['close'] < fair_price_graham,
                 },
                 "prediction": {"close": {
-                    "h1": round(ai_h1, 2)
-                }} if ai_h1 else None
+                    "h1": round(ai_h1, 2) if ai_h1 is not None else None
+                }} if ai_h1 is not None else None
             })
 
         # 6. Prediksi Masa Depan (H+1 dari data terakhir)
@@ -142,6 +148,11 @@ class StockPredictionController:
             history_response.append({
                 "date": "Next Trading Day",
                 "prediction": {"close": {"h1": round(future_val, 2)}}
+            })
+        elif not use_prediction:
+            history_response.append({
+                "date": "Next Trading Day",
+                "prediction": {"close": {"h1": 0}}
             })
 
         result = { "profile": prof, "history": history_response }
