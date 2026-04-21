@@ -10,3 +10,9 @@ class StockProfileRepository:
 
     def find_all(self):
         return list(self.collection.find({}, {"_id": 0}))
+    
+    def find_all_paginated(self, skip=0, limit=10):
+        return list(self.collection.find({}, {"_id": 0}).skip(skip).limit(limit))
+    
+    def count_all(self):
+        return self.collection.count_documents({})

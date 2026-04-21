@@ -158,7 +158,7 @@ def fetch_and_save_stock_data(start_date, end_date):
                 operations.append(
                     UpdateOne(
                         {"date_key": date_str, "symbol": symbol},
-                        {"$setOnInsert": stock_data},
+                        {"$set": stock_data},
                         upsert=True
                     )
                 )

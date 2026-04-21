@@ -9,7 +9,9 @@ controller = StockPredictionController()
 def get_list():
     """Endpoint untuk mendapatkan semua list saham + prediksi"""
     try:
-        data = controller.get_list()
+        page = int(request.args.get('page', 1))
+        limit = int(request.args.get('limit', 10))
+        data = controller.get_list(page=page, limit=limit)
         return jsonify(data), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

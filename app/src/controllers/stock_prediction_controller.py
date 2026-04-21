@@ -76,7 +76,7 @@ class StockPredictionController:
             scaler = None
         
         # 5. Mapping Response (Looping 30 hari terakhir)
-        df_display = df.tail(30).copy()
+        df_display = df.tail(20).copy()
         history_response = []
         fair_price_graham = float(prof.get('fair_price_graham', 0) or 0)
         lookback = 22 # Sesuaikan dengan lookback_days training
@@ -105,7 +105,6 @@ class StockPredictionController:
             mfi_status = self._get_mfi_status(mfi_score)
 
             history_response.append({
-                "symbol": row['symbol'],
                 "date": row['date'],
                 "high": row['high'],
                 "low": row['low'],
@@ -125,10 +124,6 @@ class StockPredictionController:
                         "hist": round(macd_hist, 2)
                     },
                     "mfi": { "score": round(mfi_score, 2), "status": mfi_status }
-                },
-                "analysis": {
-                    "fair_price_graham": fair_price_graham,
-                    "is_cheap": row['close'] < fair_price_graham,
                 },
                 "prediction": {"close": {
                     "h1": round(ai_h1, 2) if ai_h1 is not None else None
@@ -174,8 +169,18 @@ class StockPredictionController:
         except Exception as e:
             print(f"⚠️ Redis Save Error: {e}")
 
-    def get_list(self):
-        # Implementasi get_list bisa memanggil get_detail untuk tiap simbol
-        # atau disederhanakan sesuai kebutuhan profil
-        profiles = self.profile_repo.find_all()
-        return [self.get_detail(p['symbol']) for p in profiles]
+    def get_list(self, page=1, limit=10):
+        skip = (page - 1) * limit
+        profiles = self.profile_repo.find_all_paginated(skip=skip, limit=limit)
+        total_data = self.profile_repo.count_all()
+        results = [self.get_detail(p['symbol']) for p in profiles]
+        
+        return {
+            "data": results,
+            "pagination": {
+                "current_page": page,
+                "limit": limit,
+                "total_data": total_data,
+                "total_pages": (total_data + limit - 1) // limit
+            }
+        }

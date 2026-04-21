@@ -143,8 +143,9 @@ Stop Loss: [Harga dalam IDR]"""
             #     model="gemini-2.5-flash",
             #     contents=prompt
             # )
+            ai_content = ""
             # ai_content = response.text
-            # self.analyzed_repo.update_response(symbol, date, prompt, ai_content)
+            self.analyzed_repo.update_response(symbol, date, prompt, ai_content)
             return {
                 "symbol": symbol,
                 "date": date,
